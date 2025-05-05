@@ -5,7 +5,7 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import os
 from werkzeug.exceptions import NotFound
-
+from werkzeug.exceptions import NotFound
 # Load movie data
 data = pd.read_csv('main_data.csv')
 
