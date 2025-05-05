@@ -5,6 +5,7 @@ import MovieCard from "./Components/MovieCard";
 import NavBar from "./Components/NavBar";
 import Footer from "./Components/Footer";
 import ReactPlayer from "react-player";
+
 function SearchResult() {
     const params = useParams();
     const apiKey = process.env.REACT_APP_TMDB_API_KEY ? `api_key=${process.env.REACT_APP_TMDB_API_KEY}` : "api_key=b97316ed479ee4226afefc88d1792909";

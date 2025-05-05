@@ -34,11 +34,8 @@ def recommend(movie):
         movie_list = [data['movie_title'][i[0]] for i in lst]
         return movie_list
 
-from flask_cors import CORS
-
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'movie-recommender-app/build'), static_url_path='/')
-CORS(app, supports_credentials=True, origins=["https://movies-recommendation-1-m13t.onrender.com"])
-
+CORS(app, resources={r"/api/*": {"origins": ["https://movies-recommendation-1tns.onrender.com", "https://movies-recommendation-1-m13t.onrender.com", "http://localhost:3000"]}})
 
 @app.route('/api/movies', methods=['GET'])
 def movies():
