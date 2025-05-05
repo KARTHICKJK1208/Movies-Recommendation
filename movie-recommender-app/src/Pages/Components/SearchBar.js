@@ -7,36 +7,36 @@ function SearchBar({ movies, placeholder }) {
     const [inputValue, setInputValue] = useState("");
     const [filteredMovies, setFilteredMovies] = useState([]);
     const [notFound, setNotFound] = useState(false);
-
     const handleChange = (event) => {
-        const wordEntered = event.target.value;
-        setInputValue(wordEntered);
+        /*Handling the change in inputValue when the user types in the searchbar*/
         setNotFound(false);
-
+        const wordEntered = event.target.value.trim();
+        setInputValue(wordEntered);
+        const newFilter = movies.filter((value) => {
+            /*filtering the movie list according to searched movie*/
+            return value.toLowerCase().includes(wordEntered.toLowerCase());
+        });
+        setFilteredMovies([]);
+        if (newFilter.length > 0) {
+            setFilteredMovies(newFilter);
+        }
         if (wordEntered.length === 0) {
             setFilteredMovies([]);
-            return;
         }
-
-        const newFilter = movies.filter((value) =>
-            value.toLowerCase().includes(wordEntered.toLowerCase())
-        );
-        setFilteredMovies(newFilter);
     };
 
     const buttonSubmit = () => {
-        const trimmedInput = inputValue.trim();
-        if (!trimmedInput) {
-            setNotFound(true);
-            return;
+        /*Submitting the searched movie*/
+        let flag = false;
+
+        for (let movie of movies) {
+            if (inputValue.toLowerCase() === movie.toLowerCase()) {
+                flag = true;
+                break;
+            }
         }
-
-        const matchedMovie = movies.find(
-            (movie) => movie.toLowerCase() === trimmedInput.toLowerCase()
-        );
-
-        if (matchedMovie) {
-            navigate(`/search/${matchedMovie}`);
+        if (flag) {
+            navigate(`/search/${inputValue}`);
         } else {
             setNotFound(true);
         }
@@ -51,7 +51,6 @@ function SearchBar({ movies, placeholder }) {
                         className="searchingbar"
                         type="text"
                         title="Search"
-                        value={inputValue}
                         onChange={handleChange}
                         onKeyPress={(e) => {
                             if (e.key === "Enter") {
@@ -64,16 +63,16 @@ function SearchBar({ movies, placeholder }) {
                     </button>
                 </div>
             </div>
-            {notFound && (
+            {notFound ? (
                 <div className="NotFound">
-                    Sorry! The Movie You Searched for is not present in our database
+                    Sorry! The Movie You Searched for is not present in our data
+                    base
                 </div>
-            )}
-            {filteredMovies.length > 0 && (
+            ) : null}
+            {filteredMovies.length > 0 ? (
                 <div className="searchList">
                     {filteredMovies.slice(0, 10).map((movie) => (
                         <div
-                            key={movie}
                             className="searchItem"
                             onClick={() => navigate(`/search/${movie}`)}
                         >
@@ -81,7 +80,7 @@ function SearchBar({ movies, placeholder }) {
                         </div>
                     ))}
                 </div>
-            )}
+            ) : null}
         </div>
     );
 }
