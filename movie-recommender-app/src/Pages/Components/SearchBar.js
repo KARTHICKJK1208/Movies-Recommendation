@@ -9,7 +9,7 @@ function SearchBar({ movies, placeholder }) {
     const [notFound, setNotFound] = useState(false);
 
     const handleChange = (event) => {
-        const wordEntered = event.target.value.trim();
+        const wordEntered = event.target.value;
         setInputValue(wordEntered);
         setNotFound(false);
 
@@ -25,13 +25,14 @@ function SearchBar({ movies, placeholder }) {
     };
 
     const buttonSubmit = () => {
-        if (!inputValue) {
+        const trimmedInput = inputValue.trim();
+        if (!trimmedInput) {
             setNotFound(true);
             return;
         }
 
         const matchedMovie = movies.find(
-            (movie) => movie.toLowerCase() === inputValue.toLowerCase()
+            (movie) => movie.toLowerCase() === trimmedInput.toLowerCase()
         );
 
         if (matchedMovie) {
