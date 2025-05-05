@@ -1,8 +1,8 @@
-import NavBar from "./Components/NavBar";
-import SearchBar from "./Components/SearchBar";
-import Footer from "./Components/Footer";
-import "./Components/styles/HomeStyles.css";
-import MovieCard from "./Components/MovieCard";
+import SearchBar from "../Components/SearchBar";
+import NavBar from "../Components/NavBar";
+import Footer from "../Components/Footer";
+import "../Components/styles/HomeStyles.css";
+import MovieCard from "../Components/MovieCard";
 import { useEffect, useState } from "react";
 
 const Home = () => {
@@ -18,7 +18,7 @@ const Home = () => {
         setHomeGenreList([]);
         setList([]);
 
-        fetch('/api/movies')
+        fetch('https://movies-recommendation-1tns.onrender.com/api/movies')
             .then((response) => {
                 if (!response.ok) throw new Error('Failed to fetch movies');
                 return response.json();
