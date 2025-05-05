@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./styles/SearchBarStyles.css";
+import "./styles/SearchBarStyles.css";
 
 function SearchBar({ movies, placeholder }) {
     const navigate = useNavigate();
