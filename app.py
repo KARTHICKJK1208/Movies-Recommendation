@@ -37,7 +37,8 @@ def recommend(movie):
 from flask_cors import CORS
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'movie-recommender-app/build'), static_url_path='/')
-CORS(app, resources={r"/api/*": {"origins": ["https://movies-recommendation-1tns.onrender.com", "https://movies-recommendation-1-m13t.onrender.com", "http://localhost:5000"]}})
+CORS(app, supports_credentials=True, origins=["https://movies-recommendation-1-m13t.onrender.com"])
+
 
 @app.route('/api/movies', methods=['GET'])
 def movies():
