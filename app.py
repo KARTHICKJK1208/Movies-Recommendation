@@ -9,6 +9,7 @@ from werkzeug.exceptions import NotFound
 # Load movie data
 try:
     data = pd.read_csv('main_data.csv')
+    print("Successfully loaded main_data.csv")
 except Exception as e:
     print(f"Error loading main_data.csv: {e}")
     data = pd.DataFrame({'movie_title': [], 'comb': []})
@@ -25,7 +26,9 @@ def create_similarity():
 
 def get_all_movies():
     try:
-        return list(data['movie_title'].str.capitalize())
+        movies = list(data['movie_title'].str.capitalize())
+        print(f"Returning {len(movies)} movies from get_all_movies")
+        return movies
     except Exception as e:
         print(f"Error getting movies: {e}")
         return []
@@ -35,6 +38,7 @@ def recommend(movie):
     try:
         data, similarity = create_similarity()
         if similarity is None:
+            print(f"No similarity matrix for {movie}")
             return []
         if movie not in data['movie_title'].unique():
             print(f"Movie not found: {movie}")
@@ -44,13 +48,22 @@ def recommend(movie):
         lst = sorted(lst, key=lambda x: x[1], reverse=True)
         lst = lst[1:20]  # Exclude the movie itself, take top 19
         movie_list = [data['movie_title'][i[0]] for i in lst]
+        print(f"Recommendations for {movie}: {movie_list}")
         return movie_list
     except Exception as e:
         print(f"Error in recommend for {movie}: {e}")
         return []
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'movie-recommender-app/build'), static_url_path='/')
-CORS(app, resources={r"/api/*": {"origins": ["https://movies-recommendation-1tns.onrender.com", "https://movies-recommendation-1-m13t.onrender.com", "http://localhost:3000"]}})
+CORS(app, resources={r"/api/*": {
+    "origins": [
+        "https://movies-recommendation-1tns.onrender.com",
+        "https://movies-recommendation-1-m13t.onrender.com",
+        "http://localhost:3000"
+    ],
+    "methods": ["GET", "POST", "OPTIONS"],
+    "allow_headers": ["Content-Type", "Authorization"]
+}})
 
 @app.route('/api/movies', methods=['GET'])
 def movies():
@@ -76,7 +89,9 @@ def serve():
 def similarity(name):
     try:
         recommendations = recommend(name)
-        return jsonify({'movies': recommendations})
+        response = jsonify({'movies': recommendations})
+        print(f"Response for /api/similarity/{name}: {recommendations}")
+        return response
     except Exception as e:
         print(f"Error in /api/similarity/{name}: {e}")
         return jsonify({'error': 'Failed to fetch recommendations'}), 500
@@ -94,4 +109,5 @@ def not_found(e):
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
+    print(f"Starting Flask app on port {port}")
     app.run(host='0.0.0.0', port=port, debug=True)

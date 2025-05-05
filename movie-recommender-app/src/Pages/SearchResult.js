@@ -105,7 +105,10 @@ function SearchResult() {
         fetch(
             `https://api.themoviedb.org/3/search/movie?${apiKey}&query=${encodeURIComponent(inputValue)}`
         )
-            .then((response) => response.json())
+            .then((response) => {
+                if (!response.ok) throw new Error(`Failed to fetch movie data: ${response.status}`);
+                return response.json();
+            })
             .then((data) => gotTMDBData(data))
             .catch((error) => {
                 console.error("Error fetching movie data:", error);
@@ -120,11 +123,14 @@ function SearchResult() {
             .then((data) => gotRecommendedData(data))
             .catch((error) => {
                 console.error("Error fetching recommendations:", error);
-                setError("Failed to load recommendations.");
+                setError("Failed to load recommendations. Please try again later.");
             });
 
         fetch(`https://api.themoviedb.org/3/genre/movie/list?${apiKey}`)
-            .then((response) => response.json())
+            .then((response) => {
+                if (!response.ok) throw new Error(`Failed to fetch genres: ${response.status}`);
+                return response.json();
+            })
             .then((data) => setGenreList(data.genres || []))
             .catch((error) => {
                 console.error("Error fetching genres:", error);
