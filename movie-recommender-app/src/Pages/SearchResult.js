@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import "./styles/SearchResultsStyles.css";
+import "./Components/styles/SearchResultsStyles.css";
 import MovieCard from "./Components/MovieCard";
 import NavBar from "./Components/NavBar";
 import ReactPlayer from "react-player";
