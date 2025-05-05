@@ -30,7 +30,7 @@ def recommend(movie):
         movie_index = data.loc[data['movie_title'] == movie].index[0]
         lst = list(enumerate(similarity[movie_index]))
         lst = sorted(lst, key=lambda x: x[1], reverse=True)
-        lst = lst[1:20]
+        lst = lst[1:20]  # Exclude the movie itself, take top 19
         movie_list = [data['movie_title'][i[0]] for i in lst]
         return movie_list
 
@@ -75,4 +75,5 @@ def not_found(e):
         return jsonify({'error': 'index.html not found in build directory'}), 404
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.getenv('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
