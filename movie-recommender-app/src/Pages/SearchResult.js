@@ -18,8 +18,6 @@ function SearchResult() {
     const [currGenre, setCurrGenre] = useState([]);
     const [videoData, setVideoData] = useState(null);
     const [playTrailer, setPlayTrailer] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
 
     const gotCast = (castData) => {
         setCastMembers([]);
@@ -39,7 +37,6 @@ function SearchResult() {
     const gotRecommendedData = async (apiData) => {
         if (!apiData.movies || !Array.isArray(apiData.movies)) {
             console.error("Invalid or empty movies array from backend:", apiData);
-            setError("No recommendations available. The movie may not be in the database.");
             return;
         }
 
@@ -67,21 +64,9 @@ function SearchResult() {
         const movies = await Promise.all(moviePromises);
         const validMovies = movies.filter((movie) => movie !== null);
         setRecommendedMovies(validMovies);
-        if (validMovies.length === 0) {
-            setError("No valid recommendations found.");
-        }
     };
 
     useEffect(() => {
-        setIsLoading(true);
-        setError(null);
-        setSearchedMovie({});
-        setRecommendedMovies([]);
-        setCastMembers([]);
-        setGenreList([]);
-        setCurrGenre([]);
-        setVideoData(null);
-
         const gotTMDBData = (apiData) => {
             const realMovieData = apiData.results[0];
             if (realMovieData) {
@@ -97,23 +82,14 @@ function SearchResult() {
                 ).then((response) =>
                     response.json().then((data) => gotVideo(data))
                 );
-            } else {
-                setError("Movie not found.");
             }
         };
 
         fetch(
             `https://api.themoviedb.org/3/search/movie?${apiKey}&query=${encodeURIComponent(inputValue)}`
-        )
-            .then((response) => {
-                if (!response.ok) throw new Error(`Failed to fetch movie data: ${response.status}`);
-                return response.json();
-            })
-            .then((data) => gotTMDBData(data))
-            .catch((error) => {
-                console.error("Error fetching movie data:", error);
-                setError("Failed to load movie details.");
-            });
+        ).then((response) =>
+            response.json().then((data) => gotTMDBData(data))
+        );
 
         fetch(`${process.env.REACT_APP_API_URL}/api/similarity/${encodeURIComponent(inputValue)}`)
             .then((response) => {
@@ -121,31 +97,15 @@ function SearchResult() {
                 return response.json();
             })
             .then((data) => gotRecommendedData(data))
-            .catch((error) => {
-                console.error("Error fetching recommendations:", error);
-                setError("Failed to load recommendations. Please try again later.");
-            });
+            .catch((error) => console.error("Error fetching recommendations:", error));
 
         fetch(`https://api.themoviedb.org/3/genre/movie/list?${apiKey}`)
-            .then((response) => {
-                if (!response.ok) throw new Error(`Failed to fetch genres: ${response.status}`);
-                return response.json();
-            })
+            .then((response) => response.json())
             .then((data) => setGenreList(data.genres || []))
-            .catch((error) => {
-                console.error("Error fetching genres:", error);
-                setError("Failed to load genres.");
-            })
-            .finally(() => setIsLoading(false));
+            .catch((error) => console.error("Error fetching genres:", error));
     }, [inputValue, apiKey]);
 
     const RenderMovies = () => {
-        if (isLoading) {
-            return <div>Loading recommendations...</div>;
-        }
-        if (error) {
-            return <div>{error}</div>;
-        }
         if (recommendedMovies.length === 0) {
             return <div>No recommended movies available.</div>;
         }
