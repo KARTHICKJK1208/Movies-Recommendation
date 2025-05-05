@@ -22,17 +22,18 @@ def recommend(movie):
     movie = movie.lower()
     try:
         data, similarity = create_similarity()
-    except:
-        data, similarity = create_similarity()
+    except Exception as e:
+        print(f"Error creating similarity matrix: {e}")
+        return []
     if movie not in data['movie_title'].unique():
-        return 'Sorry! The movie you requested is not present in our database.'
-    else:
-        movie_index = data.loc[data['movie_title'] == movie].index[0]
-        lst = list(enumerate(similarity[movie_index]))
-        lst = sorted(lst, key=lambda x: x[1], reverse=True)
-        lst = lst[1:20]  # Exclude the movie itself, take top 19
-        movie_list = [data['movie_title'][i[0]] for i in lst]
-        return movie_list
+        print(f"Movie not found: {movie}")
+        return []
+    movie_index = data.loc[data['movie_title'] == movie].index[0]
+    lst = list(enumerate(similarity[movie_index]))
+    lst = sorted(lst, key=lambda x: x[1], reverse=True)
+    lst = lst[1:20]  # Exclude the movie itself, take top 19
+    movie_list = [data['movie_title'][i[0]] for i in lst]
+    return movie_list
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'movie-recommender-app/build'), static_url_path='/')
 CORS(app, resources={r"/api/*": {"origins": ["https://movies-recommendation-1tns.onrender.com", "https://movies-recommendation-1-m13t.onrender.com", "http://localhost:3000"]}})
@@ -43,7 +44,7 @@ def movies():
         movies = get_all_movies()
         return jsonify({'arr': movies})
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Error in /api/movies: {e}")
         return jsonify({'error': 'Internal server error'}), 500
 
 @app.route('/')
@@ -57,13 +58,12 @@ def serve():
 
 @app.route('/api/similarity/<name>')
 def similarity(name):
-    recommendations = recommend(name)
-    if isinstance(recommendations, str):
-        result_array = recommendations.split('---')
-    else:
-        movie_string = '---'.join(recommendations)
-        result_array = movie_string.split('---')
-    return jsonify({'movies': result_array})
+    try:
+        recommendations = recommend(name)
+        return jsonify({'movies': recommendations})
+    except Exception as e:
+        print(f"Error in /api/similarity/{name}: {e}")
+        return jsonify({'error': 'Failed to fetch recommendations'}), 500
 
 @app.errorhandler(404)
 def not_found(e):

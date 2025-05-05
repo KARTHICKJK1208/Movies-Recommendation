@@ -6,6 +6,7 @@ import NavBar from "./Components/NavBar";
 import Footer from "./Components/Footer";
 import ReactPlayer from "react-player";
 
+
 function SearchResult() {
     const params = useParams();
     const apiKey = process.env.REACT_APP_TMDB_API_KEY ? `api_key=${process.env.REACT_APP_TMDB_API_KEY}` : "api_key=b97316ed479ee4226afefc88d1792909";
@@ -44,7 +45,7 @@ function SearchResult() {
         const moviePromises = apiData.movies.slice(0, maxMovies).map((movieTitle) =>
             fetch(`https://api.themoviedb.org/3/search/movie?${apiKey}&query=${encodeURIComponent(movieTitle)}`)
                 .then((response) => {
-                    if (!response.ok) throw new Error(`TMDb API error for ${movieTitle}`);
+                    if (!response.ok) throw new Error(`TMDb API error for ${movieTitle}: ${response.status}`);
                     return response.json();
                 })
                 .then((data) => {
@@ -92,7 +93,7 @@ function SearchResult() {
 
         fetch(`${process.env.REACT_APP_API_URL}/api/similarity/${encodeURIComponent(inputValue)}`)
             .then((response) => {
-                if (!response.ok) throw new Error("Backend API error");
+                if (!response.ok) throw new Error(`Backend API error: ${response.status}`);
                 return response.json();
             })
             .then((data) => gotRecommendedData(data))

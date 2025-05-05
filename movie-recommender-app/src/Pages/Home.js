@@ -5,7 +5,7 @@ import "./Components/styles/HomeStyles.css";
 import MovieCard from "./Components/MovieCard";
 import { useEffect, useState } from "react";
 
-const Home = () => {
+function Home() {
     const api_key = process.env.REACT_APP_TMDB_API_KEY || 'b97316ed479ee4226afefc88d1792909';
     const [list, setList] = useState([]);
     const [homeGenreList, setHomeGenreList] = useState([]);
@@ -20,7 +20,7 @@ const Home = () => {
 
         fetch(`${process.env.REACT_APP_API_URL}/api/movies`)
             .then((response) => {
-                if (!response.ok) throw new Error('Failed to fetch movies');
+                if (!response.ok) throw new Error(`Failed to fetch movies: ${response.status}`);
                 return response.json();
             })
             .then((data) => {
@@ -31,7 +31,7 @@ const Home = () => {
 
         fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${api_key}`)
             .then((response) => {
-                if (!response.ok) throw new Error('Failed to fetch genres');
+                if (!response.ok) throw new Error(`Failed to fetch genres: ${response.status}`);
                 return response.json();
             })
             .then((data) => {
@@ -45,13 +45,16 @@ const Home = () => {
         setCurrMovies([]);
         if (selectedGenres.length > 0) {
             fetch(
-                `https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=${api_key}&release_date.lte=2019-12-12&with_genres=${encodeURI(selectedGenres.join(","))}`
+                `https://api.themoviedb.org/3/discover/movie?sort_by=popularity.desc&api_key=${api_key}&release_date.lte=2019-12-12&with_genres=${encodeURIComponent(selectedGenres.join(","))}`
             )
                 .then((response) => {
-                    if (!response.ok) throw new Error('Failed to fetch movies by genre');
+                    if (!response.ok) throw new Error(`Failed to fetch movies by genre: ${response.status}`);
                     return response.json();
                 })
-                .then((data) => setCurrMovies(data.results || []))
+                .then((data) => {
+                    setCurrMovies(data.results || []);
+                    console.log('Genre movies:', data.results);
+                })
                 .catch((error) => console.error('Error fetching movies by genre:', error));
         }
     }, [selectedGenres, api_key]);
@@ -65,12 +68,13 @@ const Home = () => {
     };
 
     const renderMovies = () =>
-        currMovies.map((movie) => {
-            if (movie && movie.id && movie.original_title) {
-                return <MovieCard key={`${movie.id}-${movie.original_title}`} movie={movie} />;
-            }
-            return null;
-        });
+        currMovies.length > 0 ? (
+            currMovies.map((movie) => (
+                <MovieCard key={`${movie.id}-${movie.original_title}`} movie={movie} />
+            ))
+        ) : (
+            <div>No movies available for selected genres.</div>
+        );
 
     return (
         <div className="container-fluid">
@@ -94,13 +98,13 @@ const Home = () => {
                 </div>
             </div>
             <div className="container-fluid HomeMovies">
-                <div className="container HomeMovieGrid">{currMovies.length > 0 ? renderMovies() : null}</div>
+                <div className="container HomeMovieGrid">{renderMovies()}</div>
             </div>
             <div className="HomeFooter">
                 <Footer />
             </div>
         </div>
     );
-};
+}
 
 export default Home;
