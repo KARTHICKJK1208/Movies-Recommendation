@@ -18,7 +18,7 @@ const Home = () => {
         setHomeGenreList([]);
         setList([]);
 
-        fetch('https://movies-recommendation-1tns.onrender.com/api/movies')
+        fetch(`${process.env.REACT_APP_API_URL}/api/movies`)
             .then((response) => {
                 if (!response.ok) throw new Error('Failed to fetch movies');
                 return response.json();

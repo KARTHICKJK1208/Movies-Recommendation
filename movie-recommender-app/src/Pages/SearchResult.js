@@ -8,7 +8,7 @@ import Footer from "./Components/Footer";
 
 const SearchResult = () => {
     const params = useParams();
-    const apiKey = "api_key=b97316ed479ee4226afefc88d1792909";
+    const apiKey = process.env.REACT_APP_TMDB_API_KEY ? `api_key=${process.env.REACT_APP_TMDB_API_KEY}` : "api_key=b97316ed479ee4226afefc88d1792909";
     const inputValue = params.id;
     const [searchedMovie, setSearchedMovie] = useState({});
     const [recommendedMovies, setRecommendedMovies] = useState([{}]);
@@ -78,7 +78,7 @@ const SearchResult = () => {
         ).then((Response) =>
             Response.json().then((data) => gotTMDBData(data))
         );
-        fetch(`https://movies-recommendation-1tns.onrender.com/api/similarity/${inputValue}`).then((Response) =>
+        fetch(`${process.env.REACT_APP_API_URL}/api/similarity/${inputValue}`).then((Response) =>
             Response.json().then((data) => gotRecommendedData(data))
         );
         fetch(
