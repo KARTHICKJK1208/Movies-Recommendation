@@ -1,0 +1,78 @@
+import pandas as pd
+from flask import Flask, jsonify, send_from_directory
+from flask_cors import CORS
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import os
+from werkzeug.exceptions import NotFound
+
+# Load movie data
+data = pd.read_csv('main_data.csv')
+
+def create_similarity():
+    cv = CountVectorizer()
+    count_matrix = cv.fit_transform(data['comb'])
+    similarity = cosine_similarity(count_matrix)
+    return data, similarity
+
+def get_all_movies():
+    return list(data['movie_title'].str.capitalize())
+
+def recommend(movie):
+    movie = movie.lower()
+    try:
+        data, similarity = create_similarity()
+    except:
+        data, similarity = create_similarity()
+    if movie not in data['movie_title'].unique():
+        return 'Sorry! The movie you requested is not present in our database.'
+    else:
+        movie_index = data.loc[data['movie_title'] == movie].index[0]
+        lst = list(enumerate(similarity[movie_index]))
+        lst = sorted(lst, key=lambda x: x[1], reverse=True)
+        lst = lst[1:20]
+        movie_list = [data['movie_title'][i[0]] for i in lst]
+        return movie_list
+
+app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'movie-recommender-app/build'), static_url_path='/')
+CORS(app)
+
+@app.route('/api/movies', methods=['GET'])
+def movies():
+    try:
+        movies = get_all_movies()
+        return jsonify({'arr': movies})
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/')
+def serve():
+    try:
+        if not os.path.exists(os.path.join(app.static_folder, 'index.html')):
+            return jsonify({'error': 'React build not found. Please run `npm run build` in the movie-recommender-app directory.'}), 500
+        return send_from_directory(app.static_folder, 'index.html')
+    except NotFound:
+        return jsonify({'error': 'index.html not found in build directory'}), 404
+
+@app.route('/api/similarity/<name>')
+def similarity(name):
+    recommendations = recommend(name)
+    if isinstance(recommendations, str):
+        result_array = recommendations.split('---')
+    else:
+        movie_string = '---'.join(recommendations)
+        result_array = movie_string.split('---')
+    return jsonify({'movies': result_array})
+
+@app.errorhandler(404)
+def not_found(e):
+    try:
+        if not os.path.exists(os.path.join(app.static_folder, 'index.html')):
+            return jsonify({'error': 'React build not found. Please run `npm run build` in the movie-recommender-app directory.'}), 500
+        return send_from_directory(app.static_folder, 'index.html')
+    except NotFound:
+        return jsonify({'error': 'index.html not found in build directory'}), 404
+
+if __name__ == '__main__':
+    app.run(debug=True)
