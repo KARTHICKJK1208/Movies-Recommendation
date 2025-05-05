@@ -36,7 +36,7 @@ def recommend(movie):
     return movie_list
 
 app = Flask(__name__, static_folder=os.path.join(os.path.dirname(__file__), 'movie-recommender-app/build'), static_url_path='/')
-CORS(app, resources={r"/api/*": {"origins": ["https://stately-baklava-fe2288.netlify.app", "https://movies-recommendation-1-m13t.onrender.com", "http://localhost:3000"]}})
+CORS(app, resources={r"/api/*": {"origins": ["https://stately-baklava-fe2288.netlify.app", "https://eclectic-sable-7b7c0f.netlify.app/", "http://localhost:3000"]}})
 
 @app.route('/api/movies', methods=['GET'])
 def movies():
