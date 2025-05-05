@@ -1,8 +1,8 @@
-import SearchBar from "../Components/SearchBar";
-import NavBar from "../Components/NavBar";
-import Footer from "../Components/Footer";
-import "../Components/styles/HomeStyles.css";
-import MovieCard from "../Components/MovieCard";
+import SearchBar from "./Components/SearchBar";
+import NavBar from "./Components/NavBar";
+import Footer from "./Components/Footer";
+import "./Components/styles/HomeStyles.css";
+import MovieCard from "./Components/MovieCard";
 import { useEffect, useState } from "react";
 
 const Home = () => {
